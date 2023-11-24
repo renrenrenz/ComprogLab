@@ -1,66 +1,73 @@
-#include <Wire.h>
+// Libraries
+#include <DHT.h>
 #include <LiquidCrystal_I2C.h>
 #include <Adafruit_Sensor.h>
-#include <DHT.h>
 
+// Defining the modules
 
-#define DHTPIN 2 
+#define DHTPIN A0
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 
-LiquidCrystal_I2C lcd(0x27, 16, 2); 
+LiquidCrystal_I2C lcd (0x27, 16, 2);
 
-
-int soilMoisturePin = A0;
-int soilMoistureThreshold = 700; 
-int relayPin = 8;
+int Pump = 8;
 
 void setup() {
-  
-  dht.begin();
+
+// To start up the modules
+
   lcd.init();
   lcd.backlight();
 
-  
-  pinMode(relayPin, OUTPUT);
-  digitalWrite(relayPin, LOW); 
+  dht.begin();
+
+  pinMode(Pump, OUTPUT);
+  digitalWrite(Pump, LOW);
 }
 
 void loop() {
-  
-  int soilMoisture = analogRead(soilMoisturePin);
+//Soil Moisture Sensor data
+  int soilMoisturePin = analogRead(A2);
+  int soilMoistureLvl = ( 100 - ( (soilMoisturePin / 1023.00) * 100 ) ); //convert analog value to percentage
 
-  
-  float humidity = dht.readHumidity();
-  float temperature = dht.readTemperature();
+//Temperature and Humidity Sensor data
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
 
-  
+//Displaying on the LCD
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("Soil Moisture:");
+  lcd.print("Soil Moisture: ");
   lcd.setCursor(0, 1);
-  lcd.print(soilMoisture);
-
-  delay(2000); 
-
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Temp: ");
-  lcd.print(temperature);
-  lcd.print("C");
-  lcd.setCursor(0, 1);
-  lcd.print("Humidity: ");
-  lcd.print(humidity);
+  lcd.print(soilMoistureLvl);
+  lcd.setCursor(3, 1);
   lcd.print("%");
 
-  
-  if (soilMoisture < soilMoistureThreshold) {
-    
-    digitalWrite(relayPin, HIGH);
-  } else {
-    
-    digitalWrite(relayPin, LOW);
-  }
+  delay(2000);
 
-  delay(2000); 
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Humidity: ");
+  lcd.print(h);
+  lcd.setCursor(15, 0);
+  lcd.print("%");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Temp: ");
+  lcd.print(t);
+  lcd.setCursor(12, 1);
+  lcd.print("C");
+  
+  // Check soil moisture level and control the relay
+    if (soilMoistureLvl > 50) {
+      // Soil is dry, water pump will turn on
+      digitalWrite (Pump, HIGH);
+    } else {
+      // Soil is wet, water pump will stay off
+      digitalWrite (Pump, LOW);
+    }
+
+  delay(2000);
+
 }
