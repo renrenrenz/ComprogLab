@@ -1,10 +1,11 @@
-// Libraries
+// Copy and paste the program in Arduino IDE to compile this
+// Download and include the Libraries
+
 #include <DHT.h>
 #include <LiquidCrystal_I2C.h>
 #include <Adafruit_Sensor.h>
 
 // Defining the modules
-
 #define DHTPIN A0
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
@@ -46,9 +47,9 @@ void loop() {
 
   delay(2000);
 
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Humidity: ");
+  lcd.clear(); // To clear the LCD
+  lcd.setCursor(0, 0); // To set the position of the info
+  lcd.print("Humidity: "); // To print the info you want
   lcd.print(h);
   lcd.setCursor(15, 0);
   lcd.print("%");
